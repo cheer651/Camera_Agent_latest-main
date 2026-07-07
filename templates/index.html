@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能视频监控 Agent 系统</title>
+    <link rel="icon" href="data:,">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#15803d",
+                        primaryLight: "#dcfce7",
+                        surface: "#ffffff",
+                        background: "#f8fafc",
+                    },
+                    boxShadow: {
+                        soft: "0 12px 32px rgba(15, 23, 42, 0.06)",
+                    },
+                },
+            },
+        };
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=asset_version) }}">
+</head>
+<body class="bg-background min-h-screen flex flex-col font-sans text-gray-800">
+    <header class="bg-surface shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:h-20 lg:py-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-primaryLight text-primary flex items-center justify-center shadow-sm">
+                        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-bold text-3xl leading-tight text-gray-800">智能视频监控 <span class="text-primary">Agent</span></div>
+                    </div>
+                </div>
+                <nav class="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg" aria-label="Tabs">
+                    <button onclick="switchTab('tab-live')" id="btn-live" class="tab-btn bg-white text-primary shadow-sm rounded-md px-4 py-2 text-sm font-medium transition-all">
+                        实时监控画面
+                    </button>
+                    <button onclick="switchTab('tab-keyframes')" id="btn-keyframes" class="tab-btn text-gray-500 hover:text-gray-700 rounded-md px-4 py-2 text-sm font-medium transition-all">
+                        关键帧分析
+                    </button>
+                    <button onclick="switchTab('tab-chat')" id="btn-chat" class="tab-btn text-gray-500 hover:text-gray-700 rounded-md px-4 py-2 text-sm font-medium transition-all">
+                        自然语言对话
+                    </button>
+                    <button onclick="switchTab('tab-summary')" id="btn-summary" class="tab-btn text-gray-500 hover:text-gray-700 rounded-md px-4 py-2 text-sm font-medium transition-all">
+                        全天日志总结
+                    </button>
+                    <a href="/dashboard" class="tab-btn text-gray-500 hover:text-gray-700 rounded-md px-4 py-2 text-sm font-medium transition-all inline-flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        Dashboard
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <section id="tab-live" class="tab-content block space-y-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">实时画面接入</h2>
+                    <p class="mt-2 text-sm text-gray-500">实时预览摄像头画面，并可手动启动离线关键帧分析任务。</p>
+                </div>
+                <div class="bg-white border border-gray-100 rounded-xl px-4 py-4 shadow-soft">
+                    <div class="flex flex-wrap items-end gap-3">
+                        <label class="text-sm text-gray-500">
+                            离线采集时长（秒）
+                            <input id="duration-seconds" type="number" min="5" step="5" value="30" class="mt-2 w-36 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </label>
+                        <button id="run-task" class="bg-primary text-white hover:bg-green-700 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                            开始离线分析
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="live-camera-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+            <div class="bg-surface rounded-xl shadow-soft border border-gray-100 p-5">
+                <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">离线任务状态</h3>
+                        <p class="text-sm text-gray-500">这里展示当前或最近一次分析任务的执行情况。</p>
+                    </div>
+                    <span id="task-status-pill" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-500">
+                        暂无任务
+                    </span>
+                </div>
+                <div id="task-status" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+            </div>
+        </section>
+
+        <section id="tab-keyframes" class="tab-content hidden">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">历史关键帧检索</h2>
+                <div class="flex items-center gap-3">
+                    <label for="events-date" class="text-sm text-gray-500">选择日期:</label>
+                    <input id="events-date" type="date" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            </div>
+            <div id="keyframe-groups" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10"></div>
+        </section>
+
+        <section id="tab-chat" class="tab-content hidden h-[calc(100vh-200px)] min-h-[640px]">
+            <div class="bg-surface rounded-xl shadow-soft border border-gray-100 h-full overflow-hidden">
+                <div class="h-full min-h-0 grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)]">
+                    <aside class="chat-sidebar min-h-0 bg-gray-50/70 border-b border-gray-100 lg:border-b-0 lg:border-r">
+                        <div class="h-full min-h-0 flex flex-col">
+                            <div class="px-5 py-5 border-b border-gray-100">
+                                <div class="flex items-center justify-between gap-3 mb-4">
+                                    <div>
+                                        <div class="text-lg font-bold text-gray-800">对话记录</div>
+                                        <div class="text-xs text-gray-400">记录每次与安防智能助理的聊天会话</div>
+                                    </div>
+                                    <button id="new-chat-session" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-gray-200 text-primary hover:border-primary/40 hover:bg-primaryLight/40 transition-colors" aria-label="新建对话">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <button id="new-chat-session-large" class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-primary text-white px-4 py-3 text-sm font-medium hover:bg-green-700 transition-colors">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    开启新对话
+                                </button>
+                            </div>
+                            <div id="chat-session-list" class="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-5"></div>
+                        </div>
+                    </aside>
+
+                    <div class="h-full min-h-0 flex flex-col min-w-0">
+                        <div class="px-6 py-4 border-b border-gray-50 bg-primaryLight/30">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                        </svg>
+                                        安防智能助理
+                                    </h2>
+                                    <p class="mt-2 text-sm text-gray-500">支持按日期、时段、摄像头和人物特征查询历史监控记录，并返回相关关键帧。</p>
+                                </div>
+                                <div class="rounded-full bg-white/80 border border-white px-3 py-1 text-xs text-gray-500">
+                                    当前会话：<span id="chat-session-title" class="font-medium text-gray-700">新对话</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chat-messages" class="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 no-scrollbar bg-gray-50/50"></div>
+
+                        <div class="shrink-0 p-4 border-t border-gray-100 bg-white">
+                            <div class="space-y-2">
+                                <div class="relative flex items-center">
+                                    <input id="question-input" type="text" placeholder="输入自然语言指令，例如：帮我查一下今天下午 2 号摄像头有没有拍到穿黑衣服的人？" class="w-full pl-4 pr-14 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white transition-colors">
+                                    <button id="ask-button" class="absolute right-2 p-2 bg-primary hover:bg-green-700 text-white rounded-full transition-colors" aria-label="发送问题">
+                                        <svg class="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-summary" class="tab-content hidden">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">全天安防日志生成（RAG）</h2>
+                <div class="flex flex-wrap items-center gap-3">
+                    <label for="summary-date" class="text-sm text-gray-500">报告日期:</label>
+                    <input id="summary-date" type="date" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-500">
+                        <input id="send-feishu" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+                        推送飞书
+                    </label>
+                    <button id="load-summary" class="bg-primaryLight text-primary hover:bg-green-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        重新生成
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-surface border border-gray-100 p-4 rounded-xl shadow-soft text-center">
+                    <p class="text-gray-500 text-sm mb-1">今日抓拍事件总数</p>
+                    <p class="text-3xl font-bold text-gray-800"><span id="summary-total-events">0</span> <span class="text-sm font-normal text-gray-400">起</span></p>
+                </div>
+                <div class="bg-surface border border-gray-100 p-4 rounded-xl shadow-soft text-center">
+                    <p class="text-gray-500 text-sm mb-1">高危预警触发</p>
+                    <p class="text-3xl font-bold text-red-500"><span id="summary-high-risk">0</span> <span class="text-sm font-normal text-gray-400">次</span></p>
+                </div>
+                <div class="bg-surface border border-gray-100 p-4 rounded-xl shadow-soft text-center">
+                    <p class="text-gray-500 text-sm mb-1">系统运行时长</p>
+                    <p class="text-3xl font-bold text-green-600"><span id="summary-runtime">24</span> <span class="text-sm font-normal text-gray-400">H</span></p>
+                </div>
+            </div>
+
+            <div class="bg-surface border border-gray-100 p-5 rounded-xl shadow-soft mb-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-3">全天概览</h3>
+                <p id="summary-overall" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line">请选择日期查看当日总结。</p>
+            </div>
+
+            <div id="summary-periods" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js', v=asset_version) }}"></script>
+</body>
+</html>

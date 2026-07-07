@@ -1,0 +1,104 @@
+{
+  "server": {
+    "provider": "openai_compatible",
+    "base_url": "http://172.16.20.114:8000/v1",
+    "photo_endpoint": "",
+    "chat_endpoint": "",
+    "model": "qwen2_5_VL",
+    "api_key": "$empty",
+    "chat_completions_endpoint": "/chat/completions",
+    "timeout_seconds": 120,
+    "max_tokens": 8192,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "presence_penalty": 1.5,
+    "top_k": 20
+  },
+  "text_llm": {
+    "enabled": true,
+    "provider": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "qwen2.5:7b-instruct",
+    "generate_endpoint": "/api/generate",
+    "timeout_seconds": 120,
+    "keep_alive": "5m",
+    "temperature": 0.2,
+    "num_ctx": 1024
+  },
+  "embedding": {
+    "enabled": true,
+    "base_url": "http://127.0.0.1:11434",
+    "endpoint": "/api/embed",
+    "model": "qwen3-embedding:0.6b",
+    "timeout_seconds": 60
+  },
+  "vector_store": {
+    "enabled": true,
+    "provider": "qdrant",
+    "base_url": "http://127.0.0.1:6333",
+    "collection_name": "security_events",
+    "vector_size": 1024,
+    "distance": "Cosine",
+    "search_limit": 12,
+    "create_payload_indexes": true
+  },
+  "storage": {
+    "base_dir": "D:\\camera_agent_data",
+    "database_path": "D:\\camera_agent_data\\security_events.db",
+    "clip_duration_seconds": 30,
+    "frame_sample_rate": 8,
+    "similarity_threshold": 0.78,
+    "min_frame_gap_seconds": 0.5,
+    "extractor_scale_factor": 0.55,
+    "motion_score_threshold": 1.8,
+    "camera_capture_workers": 3,
+    "analysis_workers": 2,
+    "event_merge_time_gap_seconds": 2.5,
+    "event_merge_similarity_threshold": 0.45,
+    "event_max_duration_seconds": 20.0,
+    "max_representative_frames": 2,
+    "daily_summary_time": "20:00",
+    "enable_daily_summary_scheduler": false
+  },
+  "feishu": {
+    "app_id": "cli_a92864241e781bd9",
+    "app_secret": "aHymgS52Sh5odhC40AfcOgySZOKABTX4",
+    "chat_id": "oc_a7d6aa5b377b24451aabf73be10e02c2",
+    "webhook_url": ""
+  },
+  "capture": {
+    "mode": "local_direct"
+  },
+  "cameras": [
+    {
+      "camera_id": "cam01",
+      "name": "1号摄像头",
+      "source_type": "rtsp",
+      "source": "rtsp://admin:Agent123@172.16.6.79:554/stream2",
+      "fallback_file": "",
+      "enabled": true,
+      "preview_enabled": true,
+      "description": "TP-Link Cam_01，研究院内网 RTSP 子码流。"
+    },
+    {
+      "camera_id": "cam02",
+      "name": "2号摄像头",
+      "source_type": "rtsp",
+      "source": "rtsp://admin:Agent123@172.16.6.105:554/stream2",
+      "fallback_file": "",
+      "enabled": true,
+      "preview_enabled": true,
+      "description": "TP-Link Cam_02，研究院内网 RTSP 子码流。"
+    },
+    {
+      "camera_id": "cam03",
+      "name": "3号摄像头",
+      "source_type": "http",
+      "source": "http://172.16.6.195:8080/stream?topic=/csi_camera/image_raw",
+      "fallback_file": "",
+      "enabled": true,
+      "preview_enabled": true,
+      "description": "Rospug 机械狗自带摄像头，研究院内网 RTSP 子码流。"
+    }
+  ]
+}

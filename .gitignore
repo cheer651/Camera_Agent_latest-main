@@ -1,0 +1,43 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+.embed-gpu/
+.cosyvoice/
+
+# Editor files
+.vscode/
+
+# Runtime outputs
+session_data/
+video_data/
+results/
+runtime/
+.sensevoice/
+*.log
+*.avi
+*.mp4
+*.jpg
+*.png
+!static/img/xiaoan-logo.png
+docs/*.pptx
+
+# Keep the main model prompt in repo
+*.txt
+!prompt.txt
+
+# Local-only test and temp files
+test_alert.py
+langchain_demo
+tmpeu58u2nx/
+tmp_pipeline_test/
+tmp_runtime/
+tmp_*/
+tmp_asr_probe*.json
+D:/camera_agent_data/local_models/
+D:/camera_agent_data/venvs/
+
+# OS files
+.DS_Store

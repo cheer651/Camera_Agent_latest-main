@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安防控制中心大屏</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css', v=asset_version) }}">
+</head>
+<body class="dashboard-body">
+    <div id="dashboard-app"></div>
+    <script type="module" src="{{ url_for('static', filename='js/dashboard/main.js', v=asset_version) }}"></script>
+</body>
+</html>
