@@ -324,7 +324,7 @@ Web 仪表盘内嵌的语音助手，支持：
 | 用途 | 模型 | 部署方式 |
 |------|------|---------|
 | 视觉分析 | Qwen2.5-VL | 远程 API（OpenAI 兼容） |
-| 文本对话/总结 | qwen2.5:7b-instruct | 本地 Ollama |
+| 文本对话/总结 | qwen2.5:7b | 本地 Ollama |
 | 向量嵌入 | qwen3-embedding:0.6b | 本地 Ollama + FastAPI |
 | 语音识别 | SenseVoiceSmall | 本地 funasr |
 | 语音合成 | sherpa-onnx VITS zh-LL | 本地 sherpa-onnx |
