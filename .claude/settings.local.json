@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -la \"D:/camera_agent_data/\" 2>&1 || echo \"DIR_NOT_FOUND\")",
-      "Read(//d/camera_agent_data/**)",
-      "Bash(echo \"=== D:\\\\\\\\camera_agent_data structure ===\")"
-    ]
-  }
-}
